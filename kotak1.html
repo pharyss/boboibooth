@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kotak1 Photo Booth</title>
+  <style>
+    body {
+      background-color: #73cbb8;
+      font-family: 'Courier New', Courier, monospace;
+      text-align: center;
+      color: #fff;
+    }
+    #camera {
+      width: 600px;
+      height: 400px;
+      background-color: #eee;
+      margin: 20px auto;
+      border-radius: 20px;
+      position: relative;
+    }
+    video, canvas {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+    }
+    #thumbnails, #stickers {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .thumb {
+      width: 100px;
+      height: 80px;
+      background-color: #ccc;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    .thumb img {
+      width: 100%;
+      height: 100%;
+    }
+    #cheeseBtn {
+      background: none;
+      border: none;
+      font-size: 2em;
+      font-weight: bold;
+      text-shadow: 2px 2px black;
+      cursor: pointer;
+    }
+    #result {
+      display: none;
+      margin-top: 30px;
+    }
+    #photosPanel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      width: fit-content;
+      margin: auto;
+    }
+    .emoji {
+      font-size: 2em;
+      cursor: grab;
+    }
+    .photo-wrapper {
+      position: relative;
+    }
+    .sticker {
+      position: absolute;
+      font-size: 2em;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="color: #f65f31">You have 3 seconds for each pose!</h2>
+  <div id="camera">
+    <video id="video" autoplay></video>
+  </div>
+  <button id="cheeseBtn">CHEESE!</button>
+
+  <div id="thumbnails"></div>
+
+  <div id="result">
+    <h2>HERE'S YOUR PHOTOS! <span style="color:#f65f31">Wanna Retake?</span></h2>
+    <div id="photosPanel"></div>
+    <p>Insert any stickers and emojis</p>
+    <div id="stickers">
+      <span class="emoji" draggable="true">✨</span>
+      <span class="emoji" draggable="true">💖</span>
+      <span class="emoji" draggable="true">👌</span>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const thumbnails = document.getElementById('thumbnails');
+    const cheeseBtn = document.getElementById('cheeseBtn');
+    const result = document.getElementById('result');
+    const photosPanel = document.getElementById('photosPanel');
+
+    let stream;
+    let snapshots = [];
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(s => {
+        stream = s;
+        video.srcObject = stream;
+      });
+
+    cheeseBtn.onclick = async () => {
+      snapshots = [];
+      thumbnails.innerHTML = '';
+      photosPanel.innerHTML = '';
+      result.style.display = 'none';
+      for (let i = 0; i < 3; i++) {
+        await countdown(1);
+        const img = capture();
+        snapshots.push(img);
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.innerHTML = `<img src="${img}" />`;
+        thumbnails.appendChild(thumb);
+      }
+      showResults();
+    };
+
+    function countdown(seconds) {
+      return new Promise(resolve => {
+        setTimeout(resolve, seconds * 1000);
+      });
+    }
+
+    function capture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+      return canvas.toDataURL('image/png');
+    }
+
+    function showResults() {
+      photosPanel.innerHTML = '';
+      snapshots.forEach(src => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'photo-wrapper';
+        wrapper.style.position = 'relative';
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.width = '200px';
+        wrapper.appendChild(img);
+        wrapper.ondrop = function(e) {
+          e.preventDefault();
+          const emoji = e.dataTransfer.getData("text");
+          const sticker = document.createElement('div');
+          sticker.className = 'sticker';
+          sticker.innerText = emoji;
+          sticker.style.left = (e.offsetX - 10) + 'px';
+          sticker.style.top = (e.offsetY - 10) + 'px';
+          wrapper.appendChild(sticker);
+        };
+        wrapper.ondragover = function(e) {
+          e.preventDefault();
+        };
+        photosPanel.appendChild(wrapper);
+      });
+      result.style.display = 'block';
+    }
+
+    document.querySelectorAll('.emoji').forEach(el => {
+      el.ondragstart = function(e) {
+        e.dataTransfer.setData("text", e.target.innerText);
+      };
+    });
+  </script>
+  <!-- Countdown display -->
+<div id="countdownDisplay" style="
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 5em;
+  font-weight: bold;
+  color: #f65f31;
+  display: none;
+  z-index: 999;
+"></div>
+
+<!-- Save button -->
+<div style="margin-top: 20px;" id="saveSection">
+  <button id="saveBtn" style="
+    font-size: 1.5em;
+    background-color: #f65f31;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: none;
+  ">Save Photos</button>
+</div>
+
+<script>
+  const countdownDisplay = document.getElementById('countdownDisplay');
+  const saveBtn = document.getElementById('saveBtn');
+
+  // Override countdown to show "CHEESE" then 3..2..1
+  countdown = function(seconds) {
+    return new Promise(async (resolve) => {
+      countdownDisplay.style.display = 'block';
+      countdownDisplay.innerText = 'CHEESE!';
+      await new Promise(res => setTimeout(res, 1000));
+      for (let i = seconds; i > 0; i--) {
+        countdownDisplay.innerText = i;
+        await new Promise(res => setTimeout(res, 1000));
+      }
+      countdownDisplay.style.display = 'none';
+      resolve();
+    });
+  };
+
+  // Enhance showResults to reveal Save button
+  const originalShowResults = showResults;
+  showResults = function() {
+    originalShowResults();
+    saveBtn.style.display = 'inline-block';
+  };
+
+  // Combine all snapshots with stickers into a single downloadable image
+  saveBtn.onclick = async () => {
+    const panel = document.getElementById('photosPanel');
+    const photoElements = panel.querySelectorAll('.photo-wrapper');
+    const width = 200;
+    const height = photoElements[0].offsetHeight;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height * photoElements.length;
+    const ctx = canvas.getContext('2d');
+
+    for (let i = 0; i < photoElements.length; i++) {
+      const wrapper = photoElements[i];
+      const img = wrapper.querySelector('img');
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      await new Promise((res) => {
+        const image = new Image();
+        image.onload = () => {
+          tempCtx.drawImage(image, 0, 0, width, height);
+          // Render stickers
+          wrapper.querySelectorAll('.sticker').forEach(sticker => {
+            const x = parseInt(sticker.style.left || 0);
+            const y = parseInt(sticker.style.top || 0);
+            tempCtx.font = '2em serif';
+            tempCtx.fillText(sticker.innerText, x, y + 20);
+          });
+          ctx.drawImage(tempCanvas, 0, i * height);
+          res();
+        };
+        image.src = img.src;
+      });
+    }
+
+    const link = document.createElement('a');
+    link.download = 'kotak1_photos.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+</script>
+
+</body>
+</html>
