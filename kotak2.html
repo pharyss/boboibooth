@@ -2,145 +2,25 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Layout 1 Photo Booth</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body {
-      background-color: #73cbb8;
-      font-family: 'Courier New', Courier, monospace;
-      text-align: center;
-      color: #fff;
-      padding-bottom: 100px;
-    }
-    #camera {
-      position: relative;
-      width: 600px;
-      height: 400px;
-      background-color: #eee;
-      margin: 20px auto;
-      border-radius: 20px;
-      overflow: hidden;
-    }
-    video {
-      width: 100%;
-      height: 100%;
-      border-radius: 20px;
-      object-fit: cover;
-    }
-    .mirror {
-      transform: scaleX(-1);
-    }
-    #mirrorToggle {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: rgba(255, 255, 255, 0.7);
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 1.2em;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
-      transition: background-color 0.3s;
-    }
-    #mirrorToggle:hover {
-      background-color: rgba(255, 255, 255, 1);
-    }
-    #cheeseBtn {
-      background: none;
-      border: none;
-      font-size: 2em;
-      font-weight: bold;
-      text-shadow: 2px 2px black;
-      cursor: pointer;
-      color: #fff;
-    }
-    #thumbnails, #stickers {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-    .thumb {
-      width: 100px;
-      height: 80px;
-      background-color: #ccc;
-      border-radius: 15px;
-      overflow: hidden;
-    }
-    .thumb img {
-      width: 100%;
-      height: 100%;
-    }
-    #result {
-      display: none;
-      margin-top: 30px;
-    }
-    #photosPanel {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: white;
-      padding: 10px;
-      border-radius: 5px;
-      width: fit-content;
-      margin: auto;
-    }
-    .photo-wrapper {
-      position: relative;
-    }
-    .sticker {
-      position: absolute;
-      font-size: 2em;
-      pointer-events: none;
-    }
-    .emoji {
-      font-size: 2em;
-      cursor: grab;
-    }
-    #countdownDisplay {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 5em;
-      font-weight: bold;
-      color: #f65f31;
-      display: none;
-      z-index: 999;
-    }
-    #saveBtn {
-      font-size: 1.5em;
-      background-color: #f65f31;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      display: none;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boboibooth | Make your memories</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/photobooth.css">
 </head>
 <body>
-  <h2 style="color: #f65f31;">You have 3 seconds for each pose!</h2>
-
+  <a href="layout-selection.html" class="back-button">&lt; Back</a>
+  <h2 style="color: #f65f31; margin-top: 100px;">You have 3 seconds for each pose!</h2>
   <div id="camera">
     <video id="video" autoplay playsinline></video>
     <button id="mirrorToggle" title="Toggle Mirror">
       <i class="fa-solid fa-arrow-right-arrow-left"></i>
     </button>
+    <button id="cheeseBtn" style="font-size: 2rem;">CHEESE!</button>
   </div>
-
-  <button id="cheeseBtn">CHEESE!</button>
+  
 
   <div id="thumbnails"></div>
-
   <div id="result">
     <h2>HERE'S YOUR PHOTOS! <span style="color:#f65f31">Wanna Retake?</span></h2>
     <div id="photosPanel"></div>
@@ -150,159 +30,12 @@
       <span class="emoji" draggable="true">💖</span>
       <span class="emoji" draggable="true">👌</span>
     </div>
+    <div id="photosPanel">
+      <!-- Polaroid photo will be inserted here dynamically -->
+    </div>    
   </div>
-
   <div id="countdownDisplay"></div>
   <button id="saveBtn">Save Photos</button>
-
-  <script>
-    const video = document.getElementById('video');
-    const mirrorToggle = document.getElementById('mirrorToggle');
-    const thumbnails = document.getElementById('thumbnails');
-    const cheeseBtn = document.getElementById('cheeseBtn');
-    const result = document.getElementById('result');
-    const photosPanel = document.getElementById('photosPanel');
-    const countdownDisplay = document.getElementById('countdownDisplay');
-    const saveBtn = document.getElementById('saveBtn');
-
-    let stream;
-    let snapshots = [];
-
-    // Start camera
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(s => {
-        stream = s;
-        video.srcObject = stream;
-      });
-
-    mirrorToggle.addEventListener('click', () => {
-      video.classList.toggle('mirror');
-    });
-
-    cheeseBtn.onclick = async () => {
-      snapshots = [];
-      thumbnails.innerHTML = '';
-      photosPanel.innerHTML = '';
-      result.style.display = 'none';
-      const totalShots = 2;
-      for (let i = 0; i < totalShots; i++) {
-        await countdown(3);
-        const img = capture();
-        snapshots.push(img);
-        const thumb = document.createElement('div');
-        thumb.className = 'thumb';
-        thumb.innerHTML = `<img src="${img}" />`;
-        thumbnails.appendChild(thumb);
-      }
-      showResults();
-    };
-
-    function countdown(seconds) {
-      return new Promise(async (resolve) => {
-        countdownDisplay.style.display = 'block';
-        countdownDisplay.innerText = 'CHEESE!';
-        await new Promise(r => setTimeout(r, 1000));
-        for (let i = seconds; i > 0; i--) {
-          countdownDisplay.innerText = i;
-          await new Promise(r => setTimeout(r, 1000));
-        }
-        countdownDisplay.style.display = 'none';
-        resolve();
-      });
-    }
-
-    function capture() {
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-
-      if (video.classList.contains('mirror')) {
-        ctx.translate(canvas.width, 0);
-        ctx.scale(-1, 1);
-      }
-
-      ctx.drawImage(video, 0, 0);
-      return canvas.toDataURL('image/png');
-    }
-
-    function showResults() {
-      photosPanel.innerHTML = '';
-      snapshots.forEach(src => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'photo-wrapper';
-        const img = document.createElement('img');
-        img.src = src;
-        img.style.width = '200px';
-        wrapper.appendChild(img);
-
-        wrapper.ondrop = function(e) {
-          e.preventDefault();
-          const emoji = e.dataTransfer.getData("text");
-          const sticker = document.createElement('div');
-          sticker.className = 'sticker';
-          sticker.innerText = emoji;
-          sticker.style.left = (e.offsetX - 10) + 'px';
-          sticker.style.top = (e.offsetY - 10) + 'px';
-          wrapper.appendChild(sticker);
-        };
-
-        wrapper.ondragover = function(e) {
-          e.preventDefault();
-        };
-
-        photosPanel.appendChild(wrapper);
-      });
-      result.style.display = 'block';
-      saveBtn.style.display = 'inline-block';
-    }
-
-    document.querySelectorAll('.emoji').forEach(el => {
-      el.ondragstart = function(e) {
-        e.dataTransfer.setData("text", e.target.innerText);
-      };
-    });
-
-    saveBtn.onclick = async () => {
-      const panel = document.getElementById('photosPanel');
-      const photoElements = panel.querySelectorAll('.photo-wrapper');
-      const width = 200;
-      const height = photoElements[0].offsetHeight;
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height * photoElements.length;
-      const ctx = canvas.getContext('2d');
-
-      for (let i = 0; i < photoElements.length; i++) {
-        const wrapper = photoElements[i];
-        const img = wrapper.querySelector('img');
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = width;
-        tempCanvas.height = height;
-        const tempCtx = tempCanvas.getContext('2d');
-
-        await new Promise((res) => {
-          const image = new Image();
-          image.onload = () => {
-            tempCtx.drawImage(image, 0, 0, width, height);
-            wrapper.querySelectorAll('.sticker').forEach(sticker => {
-              const x = parseInt(sticker.style.left || 0);
-              const y = parseInt(sticker.style.top || 0);
-              tempCtx.font = '2em serif';
-              tempCtx.fillText(sticker.innerText, x, y + 20);
-            });
-            ctx.drawImage(tempCanvas, 0, i * height);
-            res();
-          };
-          image.src = img.src;
-        });
-      }
-
-      const link = document.createElement('a');
-      link.download = 'photo_result.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    };
-  </script>
+  <script src="js/kotak2.js"></script>
 </body>
 </html>
