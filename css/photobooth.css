@@ -1,0 +1,202 @@
+:root {
+    --retro-blue: #68C7C1;
+    --retro-yellow: #FACA78;
+    --retro-orange: #F57F5B;
+    --retro-red: #DC5341;
+    --retro-brown: #794A3A;
+    --bg-light: #FFF5E1;
+    --text-dark: #4A3F35;
+  }
+  
+body {
+    font-family: 'Press Start 2P', cursive;
+    background-color: var(--retro-blue);
+    color: var(--text-dark);
+    text-align: center;
+    color: #fff;
+    padding-bottom: 1rem;
+  }
+
+  .back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    text-decoration: none;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+    color: #794A3A;
+    background-color: #FACA78;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #DC5341;
+    color: #fff;
+  }  
+  
+  button {
+    font-family: 'Press Start 2P', cursive;
+    color: white;
+    -webkit-text-stroke: 0.5px black;
+    margin-top: 50px;
+  }
+
+  button, select {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    background-color: var(--retro-red);
+    color: white;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover, select:hover {
+    background-color: var(--retro-brown);
+  }
+
+  #camera {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    background-color: #eee;
+    margin: 20px auto;
+    border-radius: 20px;
+    overflow: hidden;
+    padding: 30px;
+    padding-bottom: 100px;
+  }
+  video {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    object-fit: cover;
+  }
+  .mirror {
+    transform: scaleX(-1);
+  }
+  
+  #mirrorToggle {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1rem;
+    color: #794A3A;
+    background-color: #FACA78;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  #mirrorToggle:hover {
+    background-color: #DC5341;
+    color: #fff;
+  }
+  
+
+  #thumbnails, #stickers {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .thumb {
+    width: 100px;
+    height: 80px;
+    background-color: #ccc;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+  }
+  #result {
+    display: none;
+    margin-top: 30px;
+  }
+  #photosPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    width: fit-content;
+    margin: auto;
+  }
+  .photo-wrapper {
+    position: relative;
+  }
+  .sticker {
+    position: absolute;
+    font-size: 2em;
+    pointer-events: none;
+  }
+  .emoji {
+    font-size: 2em;
+    cursor: grab;
+  }
+  #countdownDisplay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5em;
+    font-weight: bold;
+    color: #f65f31;
+    display: none;
+    z-index: 999;
+  }
+
+  .polaroid {
+    position: relative;
+    background: white; 
+    width: 220px;
+    padding: 10px 10px 30px 10px;
+    margin: 10px;
+    border-radius: 6px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+    display: inline-block;
+    text-align: center;
+    font-family: 'Press Start 2P', cursive;
+  }
+  
+  .polaroid img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    background-color: white;
+  }
+  
+  .polaroid .caption {
+    font-size: 0.6rem;
+    color: #794A3A;
+    margin-top: 6px;
+  }
+  
+  #saveBtn {
+    font-size: 1.5em;
+    background-color: #f65f31;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: none;
+    margin-bottom: 20px;
+  }
+  
+  
