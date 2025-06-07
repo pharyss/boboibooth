@@ -184,7 +184,8 @@
       thumbnails.innerHTML = '';
       photosPanel.innerHTML = '';
       result.style.display = 'none';
-      for (let i = 0; i < 3; i++) {
+      const totalShots = 2;
+      for (let i = 0; i < totalShots; i++) {
         await countdown(3);
         const img = capture();
         snapshots.push(img);
