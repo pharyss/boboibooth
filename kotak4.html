@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kotak 4 Foto</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #fff4f2; }
+    video { transform: scaleX(-1); width: 300px; }
+    .thumb img { width: 120px; margin: 5px; }
+    #countdownDisplay { font-size: 4rem; color: #f65f31; margin: 20px; }
+    #photosPanel { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .photo-wrapper img { width: 200px; }
+    #saveBtn { margin-top: 20px; padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h2>You have 3 seconds for each pose!</h2>
+  <video id="video" autoplay playsinline></video>
+  <br><br>
+  <button id="cheeseBtn">CHEESE!</button>
+  <div id="countdownDisplay"></div>
+  <div id="photosPanel"></div>
+  <button id="saveBtn">Save</button>
+
+  <script>
+    const video = document.getElementById('video');
+    const cheeseBtn = document.getElementById('cheeseBtn');
+    const countdownDisplay = document.getElementById('countdownDisplay');
+    const photosPanel = document.getElementById('photosPanel');
+    const saveBtn = document.getElementById('saveBtn');
+
+    let snapshots = [];
+
+    navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+      video.srcObject = s;
+    });
+
+    function countdown(seconds) {
+      return new Promise(async (resolve) => {
+        for (let i = seconds; i > 0; i--) {
+          countdownDisplay.textContent = i;
+          await new Promise(res => setTimeout(res, 1000));
+        }
+        countdownDisplay.textContent = '📸';
+        await new Promise(res => setTimeout(res, 500));
+        countdownDisplay.textContent = '';
+        resolve();
+      });
+    }
+
+    function capture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0);
+      return canvas.toDataURL('image/png');
+    }
+
+    cheeseBtn.onclick = async () => {
+      snapshots = [];
+      photosPanel.innerHTML = '';
+      for (let i = 0; i < 4; i++) {
+        await countdown(3);
+        const imgData = capture();
+        snapshots.push(imgData);
+
+        const img = document.createElement('img');
+        img.src = imgData;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'photo-wrapper';
+        wrapper.appendChild(img);
+        photosPanel.appendChild(wrapper);
+      }
+    };
+
+    saveBtn.onclick = () => {
+      const canvas = document.createElement('canvas');
+      const width = 200, height = 250;
+      canvas.width = width;
+      canvas.height = height * 4;
+      const ctx = canvas.getContext('2d');
+
+      snapshots.forEach((src, index) => {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, height * index, width, height);
+          if (index === 3) {
+            const link = document.createElement('a');
+            link.download = 'kotak4_photos.png';
+            link.href = canvas.toDataURL();
+            link.click();
+          }
+        };
+        img.src = src;
+      });
+    };
+  </script>
+</body>
+</html>
