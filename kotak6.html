@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boboibooth | Make your memories</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/photobooth.css">
+</head>
+<body>
+  <a href="layout-selection.html" class="back-button">&lt; Back</a>
+  <h2 style="color: #f65f31; margin-top: 100px;">You have 3 seconds for each pose!</h2>
+
+  <div id="camera">
+    <video id="video" autoplay playsinline></video>
+    <button id="mirrorToggle" title="Toggle Mirror">
+      <i class="fa-solid fa-arrow-right-arrow-left"></i>
+    </button>
+    <button id="cheeseBtn" style="font-size: 2rem;">CHEESE!</button>
+  </div>
+
+  <div id="thumbnails"></div>
+
+  <div id="result">
+    <h2>HERE'S YOUR PHOTOS! <span style="color:#f65f31">Wanna Retake?</span></h2>
+    <p>Insert any stickers and emojis</p>
+    <div id="stickers">
+      <span class="emoji" draggable="true">✨</span>
+      <span class="emoji" draggable="true">💖</span>
+      <span class="emoji" draggable="true">👌</span>
+    </div>
+    <div id="photosPanel">
+      <!-- Polaroid photos appear here -->
+    </div>
+  </div>
+
+  <div id="countdownDisplay"></div>
+  <button id="saveBtn">Save Photos</button>
+  <script src="js/kotak6.js"></script>
+</body>
+</html>
