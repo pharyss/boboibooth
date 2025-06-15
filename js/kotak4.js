@@ -1,139 +1,121 @@
 const video = document.getElementById('video');
+const mirrorToggle = document.getElementById('mirrorToggle');
 const thumbnails = document.getElementById('thumbnails');
 const cheeseBtn = document.getElementById('cheeseBtn');
 const result = document.getElementById('result');
 const photosPanel = document.getElementById('photosPanel');
 const countdownDisplay = document.getElementById('countdownDisplay');
 const saveBtn = document.getElementById('saveBtn');
-const mirrorToggle = document.getElementById('mirrorToggle');
 
-let isMirrored = true;
 let stream;
 let snapshots = [];
 
-// Start camera
-navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
-  stream = s;
-  video.srcObject = stream;
+navigator.mediaDevices.getUserMedia({ video: true })
+  .then(s => {
+    stream = s;
+    video.srcObject = stream;
+  });
+
+mirrorToggle.addEventListener('click', () => {
+  video.classList.toggle('mirror');
 });
 
-// Mirror toggle
-mirrorToggle.onclick = () => {
-  isMirrored = !isMirrored;
-  video.style.transform = isMirrored ? 'scaleX(-1)' : 'scaleX(1)';
+cheeseBtn.onclick = async () => {
+  snapshots = [];
+  thumbnails.innerHTML = '';
+  photosPanel.innerHTML = '';
+  result.style.display = 'none';
+  for (let i = 0; i < 4; i++) {
+    await countdown(3);
+    const img = capture();
+    snapshots.push(img);
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    thumb.innerHTML = `<img src="${img}" />`;
+    thumbnails.appendChild(thumb);
+  }
+  showResults();
 };
 
-// Countdown function
 function countdown(seconds) {
   return new Promise(async (resolve) => {
     countdownDisplay.style.display = 'block';
+    countdownDisplay.innerText = 'CHEESE!';
+    await new Promise(r => setTimeout(r, 1000));
     for (let i = seconds; i > 0; i--) {
       countdownDisplay.innerText = i;
-      await new Promise(res => setTimeout(res, 1000));
+      await new Promise(r => setTimeout(r, 1000));
     }
-    countdownDisplay.innerText = '📸';
-    await new Promise(res => setTimeout(res, 500));
     countdownDisplay.style.display = 'none';
     resolve();
   });
 }
 
-// Capture function
 function capture() {
   const canvas = document.createElement('canvas');
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
   const ctx = canvas.getContext('2d');
-  if (isMirrored) {
+
+  if (video.classList.contains('mirror')) {
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
   }
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  ctx.drawImage(video, 0, 0);
   return canvas.toDataURL('image/png');
 }
 
-// Main capture process
-cheeseBtn.onclick = async () => {
-  cheeseBtn.disabled = true;
+function addPolaroidImage(imageDataUrl) {
+  const polaroidDiv = document.createElement('div');
+  polaroidDiv.className = 'polaroid';
 
-  // Tunggu sampai kamera siap
-  while (!video.videoWidth || video.videoWidth === 0) {
-    console.log("Menunggu kamera siap...");
-    await new Promise(resolve => setTimeout(resolve, 200));
-  }
+  const img = document.createElement('img');
+  img.src = imageDataUrl;
 
-  console.log("Kamera siap. Mulai mengambil foto.");
+  polaroidDiv.appendChild(img);
 
-  snapshots = [];
-  thumbnails.innerHTML = '';
-  photosPanel.innerHTML = '';
-  result.style.display = 'none';
+  polaroidDiv.ondrop = function (e) {
+    e.preventDefault();
+    const emoji = e.dataTransfer.getData("text");
+    const sticker = document.createElement('div');
+    sticker.className = 'sticker';
+    sticker.innerText = emoji;
+    sticker.style.left = (e.offsetX - 10) + 'px';
+    sticker.style.top = (e.offsetY - 10) + 'px';
+    polaroidDiv.appendChild(sticker);
+  };
 
-  for (let i = 0; i < 4; i++) {
-    console.log(`Pose ke-${i + 1}`);
-    await countdown(3);
+  polaroidDiv.ondragover = function (e) {
+    e.preventDefault();
+  };
 
-    const imgData = capture();
-    snapshots.push(imgData);
+  photosPanel.appendChild(polaroidDiv);
+}
 
-    const thumb = document.createElement('div');
-    thumb.className = 'thumb';
-    thumb.innerHTML = `<img src="${imgData}" />`;
-    thumbnails.appendChild(thumb);
-  }
-
-  cheeseBtn.disabled = false;
-  showResults();
-};
-
-// Show result with draggable emojis
 function showResults() {
-  result.style.display = 'block';
   photosPanel.innerHTML = '';
-
   snapshots.forEach(src => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'photo-wrapper';
-    const img = document.createElement('img');
-    img.src = src;
-    img.style.width = '200px';
-    wrapper.appendChild(img);
-
-    wrapper.ondrop = function(e) {
-      e.preventDefault();
-      const emoji = e.dataTransfer.getData("text");
-      const sticker = document.createElement('div');
-      sticker.className = 'sticker';
-      sticker.innerText = emoji;
-      sticker.style.left = (e.offsetX - 10) + 'px';
-      sticker.style.top = (e.offsetY - 10) + 'px';
-      wrapper.appendChild(sticker);
-    };
-    wrapper.ondragover = function(e) {
-      e.preventDefault();
-    };
-
-    photosPanel.appendChild(wrapper);
+    addPolaroidImage(src);
   });
-
+  result.style.display = 'block';
   saveBtn.style.display = 'inline-block';
 }
 
-// Drag and drop for emoji
 document.querySelectorAll('.emoji').forEach(el => {
-  el.ondragstart = function(e) {
+  el.ondragstart = function (e) {
     e.dataTransfer.setData("text", e.target.innerText);
   };
 });
 
-// Save result as one image
 saveBtn.onclick = async () => {
-  const photoElements = document.querySelectorAll('.photo-wrapper');
-  const width = 200;
+  const panel = document.getElementById('photosPanel');
+  const photoElements = panel.querySelectorAll('.polaroid');
+  const width = 220;
   const height = photoElements[0].offsetHeight;
   const canvas = document.createElement('canvas');
-  canvas.width = width * 2;
-  canvas.height = height * 2;
+  canvas.width = width * 2;      // 2 kolom
+  canvas.height = height * 2;    // 2 baris
   const ctx = canvas.getContext('2d');
 
   for (let i = 0; i < photoElements.length; i++) {
@@ -147,9 +129,9 @@ saveBtn.onclick = async () => {
     await new Promise((res) => {
       const image = new Image();
       image.onload = () => {
-        tempCtx.drawImage(image, 0, 0, width, height);
-
-        // Render stickers
+        tempCtx.fillStyle = 'white';
+        tempCtx.fillRect(0, 0, width, height);
+        tempCtx.drawImage(image, 10, 10, width - 20, height - 20);
         wrapper.querySelectorAll('.sticker').forEach(sticker => {
           const x = parseInt(sticker.style.left || 0);
           const y = parseInt(sticker.style.top || 0);
@@ -157,9 +139,9 @@ saveBtn.onclick = async () => {
           tempCtx.fillText(sticker.innerText, x, y + 20);
         });
 
-        const posX = (i % 2) * width;
-        const posY = Math.floor(i / 2) * height;
-        ctx.drawImage(tempCanvas, posX, posY);
+        const x = (i % 2) * width;
+        const y = Math.floor(i / 2) * height;
+        ctx.drawImage(tempCanvas, x, y);
         res();
       };
       image.src = img.src;
@@ -167,7 +149,7 @@ saveBtn.onclick = async () => {
   }
 
   const link = document.createElement('a');
-  link.download = 'kotak4_photos.png';
+  link.download = 'photo_result.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
 };
