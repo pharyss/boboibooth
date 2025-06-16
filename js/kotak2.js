@@ -9,6 +9,7 @@ const saveBtn = document.getElementById('saveBtn');
 
 let stream;
 let snapshots = [];
+let selectedFrame = null;
 
 // Start camera
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -26,7 +27,7 @@ cheeseBtn.onclick = async () => {
   thumbnails.innerHTML = '';
   photosPanel.innerHTML = '';
   result.style.display = 'none';
-  for (let i = 0; i < 2; i++) {
+  for (let i = 0; i < 3; i++) {
     await countdown(3);
     const img = capture();
     snapshots.push(img);
@@ -67,6 +68,7 @@ function capture() {
   return canvas.toDataURL('image/png');
 }
 
+
 // Fungsi polaroid
 function addPolaroidImage(imageDataUrl) {
     const polaroidDiv = document.createElement('div');
@@ -77,6 +79,31 @@ function addPolaroidImage(imageDataUrl) {
   
     polaroidDiv.appendChild(img);
   
+    document.querySelectorAll('.frame-option').forEach(img => {
+  img.addEventListener('click', () => {
+    document.querySelectorAll('.frame-option').forEach(i => i.classList.remove('active'));
+    img.classList.add('active');
+    selectedFrame = img.getAttribute('data-frame');
+
+    // Tampilkan di atas foto (preview)
+    document.querySelectorAll('.photo-wrapper img').forEach(photo => {
+      let frameOverlay = photo.parentElement.querySelector('.frame-overlay');
+      if (!frameOverlay) {
+        frameOverlay = document.createElement('img');
+        frameOverlay.className = 'frame-overlay';
+        frameOverlay.style.position = 'absolute';
+        frameOverlay.style.top = '0';
+        frameOverlay.style.left = '0';
+        frameOverlay.style.width = '100%';
+        frameOverlay.style.height = '100%';
+        frameOverlay.style.pointerEvents = 'none';
+        photo.parentElement.appendChild(frameOverlay);
+      }
+      frameOverlay.src = selectedFrame;
+    });
+  });
+});
+
     // Event drag & drop emoji
     polaroidDiv.ondrop = function (e) {
       e.preventDefault();
@@ -150,6 +177,35 @@ saveBtn.onclick = async () => {
       });
     }
   
+    function downloadPhotoWithFrame(photoWrapper) {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const photo = photoWrapper.querySelector('img');
+  const frame = photoWrapper.querySelector('.frame-overlay');
+
+  canvas.width = photo.naturalWidth;
+  canvas.height = photo.naturalHeight;
+
+  // Gambar foto utama
+  ctx.drawImage(photo, 0, 0, canvas.width, canvas.height);
+
+  // Tambahkan frame jika ada
+  if (frame) {
+    const frameImg = new Image();
+    frameImg.crossOrigin = 'anonymous';
+    frameImg.src = frame.src;
+    frameImg.onload = () => {
+      ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+
+      // Download
+      const link = document.createElement('a');
+      link.download = 'photo_with_frame.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    };
+  }
+}
+
     const link = document.createElement('a');
     link.download = 'photo_result.png';
     link.href = canvas.toDataURL('image/png');
