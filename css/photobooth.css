@@ -59,17 +59,28 @@ body {
     background-color: var(--retro-brown);
   }
 
+    #camera-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  justify-content: center;
+  }
+
   #camera {
     position: relative;
     width: 600px;
     height: 400px;
     background-color: #eee;
-    margin: 20px auto;
+    margin: 20px;
     border-radius: 20px;
     overflow: hidden;
     padding: 30px;
     padding-bottom: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+
   video {
     width: 100%;
     height: 100%;
@@ -105,19 +116,20 @@ body {
   }
   
 
-  #thumbnails, #stickers {
+  #thumbnails {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 0;
     margin-top: 20px;
-    flex-wrap: wrap;
+    flex-direction: column;
   }
+
   .thumb {
-    width: 100px;
-    height: 80px;
-    background-color: #ccc;
-    border-radius: 15px;
+    width: 190px;
+    height: 130px;
+    background-color: #ffffff;
     overflow: hidden;
+    padding: 20px;
   }
   .thumb img {
     width: 100%;
@@ -127,6 +139,46 @@ body {
     display: none;
     margin-top: 30px;
   }
+
+  #editContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+#frameSelector {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px;
+}
+.frame-option {
+  width: 100px;
+  height: auto;
+  cursor: pointer;
+  border: 3px solid transparent;
+  border-radius: 6px;
+}
+
+.frame-option.active {
+  border-color: var(--retro-orange);
+}
+
+.frame-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+  
   #photosPanel {
     display: flex;
     flex-direction: column;
@@ -135,11 +187,21 @@ body {
     padding: 10px;
     border-radius: 5px;
     width: fit-content;
-    margin: auto;
+    margin: 20px;
   }
   .photo-wrapper {
     position: relative;
+    display: inline-block;
   }
+
+  #stickers {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  min-width: 200px;
+  text-align: center;
+}
+
   .sticker {
     position: absolute;
     font-size: 2em;
@@ -149,6 +211,15 @@ body {
     font-size: 2em;
     cursor: grab;
   }
+
+   #stickers {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    flex-direction: row;
+  }
+
   #countdownDisplay {
     position: fixed;
     top: 50%;
