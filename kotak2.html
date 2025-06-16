@@ -11,6 +11,8 @@
 <body>
   <a href="layout-selection.html" class="back-button">&lt; Back</a>
   <h2 style="color: #f65f31; margin-top: 100px;">You have 3 seconds for each pose!</h2>
+  
+  <div id="camera-container">
   <div id="camera">
     <video id="video" autoplay playsinline></video>
     <button id="mirrorToggle" title="Toggle Mirror">
@@ -18,24 +20,51 @@
     </button>
     <button id="cheeseBtn" style="font-size: 2rem;">CHEESE!</button>
   </div>
-  
-
   <div id="thumbnails"></div>
-  <div id="result">
-    <h2>HERE'S YOUR PHOTOS! <span style="color:#f65f31">Wanna Retake?</span></h2>
-    <div id="photosPanel"></div>
-    <p>Insert any stickers and emojis</p>
-    <div id="stickers">
-      <span class="emoji" draggable="true">✨</span>
-      <span class="emoji" draggable="true">💖</span>
-      <span class="emoji" draggable="true">👌</span>
-    </div>
-    <div id="photosPanel">
-      <!-- Polaroid photo will be inserted here dynamically -->
-    </div>    
   </div>
+  
+<div id="result">
+  <h2>HERE'S YOUR PHOTOS! <span style="color:#f65f31">Wanna Retake?</span></h2>
+
+  <div id="editContainer">
+    <div id="frameSelector">
+  <h2>Select Your Frame</h2>
+  <div class="slider">
+    <img class="frame-option active" src="images/1.png" data-frame="images/1.png">
+    <img class="frame-option" src="images/2.png" data-frame="images/2.png">
+    <!-- Tambah frame lain di sini -->
+  </div>
+  <nav class="slider-nav">
+    <ul>
+      <li class="arrow"><a class="previous"><span>&#10094; Prev</span></a></li>
+      <li class="arrow"><a class="next"><span>Next &#10095;</span></a></li>
+    </ul>
+  </nav>
+</div>
+    <div id="photosPanel"></div>  
+ <div id="sticker">
+  <p style="color:#f65f31">Insert any stickers and emojis</p>
+  <div id="stickers">
+    <span class="emoji" draggable="true">✨</span>
+    <span class="emoji" draggable="true">💖</span>
+    <span class="emoji" draggable="true">👌</span>
+    <span class="emoji" draggable="true">😎</span>
+    <span class="emoji" draggable="true">🎉</span>
+    <span class="emoji" draggable="true">🌈</span>
+    <span class="emoji" draggable="true">🦄</span>
+    <span class="emoji" draggable="true">🥳</span>
+    <span class="emoji" draggable="true">🐱</span>
+    <span class="emoji" draggable="true">🐶</span>
+    <span class="emoji" draggable="true">🍕</span>
+    <span class="emoji" draggable="true">🧋</span>
+  </div>
+</div> 
+  </div>
+</div>
+
+
   <div id="countdownDisplay"></div>
   <button id="saveBtn">Save Photos</button>
-  <script src="js/kotak2.js"></script>
+  <script src="js/layout2.js"></script>
 </body>
 </html>
